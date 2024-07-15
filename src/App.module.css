@@ -8,43 +8,155 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.app div:first-child {
+.title {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
 }
 
-.todoItem {
+.form {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
     margin-bottom: 10px;
-    background-color: #fff;
+}
+
+.inputTitle {
+    width: calc(100% - 110px);
+    padding: 10px;
+    border: 1px solid #ccc;
     border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0 10px 0 10px;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.buttonAdd {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.todoItem:nth-child(even) {
-    background-color: #f9f9f9;
+.button:disabled {
+    background-color: #95a5a6;
+}
+
+.button:hover:enabled {
+    background-color: #2980b9;
+}
+
+.todoItemContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.todoItem,
+.inputField {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 15px;
+}
+
+.inputField {
+    width: 100%;
 }
 
 .todoItem:hover {
     background-color: #eaeaea;
 }
 
+.editButton,
+.deleteButton,
+.saveButton {
+    padding: 10px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.editButton {
+    background-color: #f39c12;
+    color: white;
+    width: 120px;
+}
+
+.editButton:hover {
+    background-color: #e67e22;
+}
+
+.deleteButton {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.saveButton {
+    background-color: #4caf50;
+    color: white;
+    width: 120px;
+    transition: background-color 0.3s ease;
+}
+
+.deleteButton:hover {
+    background-color: #c0392b;
+}
+
+.saveButton:hover {
+    background-color: #45a049;
+}
+
+.sortButton {
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.sortButton:hover {
+    background-color: #0056b3;
+}
+
+.sortButton.active {
+    background-color: #28a745;
+}
+
 .loader {
-    border: 8px solid #f3f3f3; /* Light grey */
-    border-top: 8px solid #3498db; /* Blue */
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
     border-radius: 50%;
     width: 60px;
     height: 60px;
     animation: spin 2s linear infinite;
-    margin: 20px auto; /* Center the loader */
+    margin: 20px auto;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

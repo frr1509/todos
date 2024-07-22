@@ -1,51 +1,47 @@
 import { useState, useEffect } from "react";
+import { ref, onValue, push, set, remove } from "firebase/database";
 import styles from "./App.module.css";
+import { db } from "./firebase";
 
 export const App = () => {
     const [todo, setTodo] = useState("");
     const [newTodo, setNewTodo] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
-    const [refreshTodosFlag, SetRefreshTodosFlag] = useState(false);
     const [editableTodoId, setEditableTodoId] = useState(null);
     const [editableText, setEditableText] = useState("");
     const [isSorted, setIsSorted] = useState(false);
     const [search, setSearch] = useState("");
 
-    const refreshTodos = () => SetRefreshTodosFlag(!refreshTodosFlag);
-
     useEffect(() => {
         setIsLoading(true);
-
-        fetch("http://localhost:3005/todos")
-            .then((loadedData) => loadedData.json())
-            .then((loadedTodos) => {
-                if (isSorted) {
-                    loadedTodos.sort((a, b) => a.text.localeCompare(b.text));
-                }
-                setNewTodo(loadedTodos);
-            })
-            .finally(() => setIsLoading(false));
-    }, [refreshTodosFlag, isSorted]);
+        const todosDbRef = ref(db, "todos");
+        return onValue(todosDbRef, (snapshot) => {
+            const loadedTodos = snapshot.val();
+            const todosArray = loadedTodos
+                ? Object.entries(loadedTodos).map(([id, todo]) => ({
+                      id,
+                      ...todo,
+                  }))
+                : [];
+            if (isSorted) {
+                todosArray.sort((a, b) => a.text.localeCompare(b.text));
+            }
+            setNewTodo(todosArray);
+            setIsLoading(false);
+        });
+    }, [isSorted]);
 
     const requestAddTodos = (event) => {
+        const todosDbRef = ref(db, "todos");
         event.preventDefault();
         setIsCreating(true);
-
-        fetch("http://localhost:3005/todos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json;charset=utf-8" },
-            body: JSON.stringify({
-                text: todo,
-            }),
-        })
-            .then((rawResponce) => rawResponce.json())
-            .then((responce) => {
-                console.log("задача добавлена", responce);
-                refreshTodos();
-            })
-            .finally(() => setIsCreating(false));
-        setTodo("");
+        push(todosDbRef, {
+            text: todo,
+        }).then(() => {
+            setTodo("");
+            setIsCreating(false);
+        });
     };
 
     const handleEdit = (id, text) => {
@@ -54,33 +50,21 @@ export const App = () => {
     };
 
     const requestEditableTodos = (id) => {
-        fetch(`http://localhost:3005/todos/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json;charset=utf-8" },
-            body: JSON.stringify({
-                text: editableText,
-            }),
-        })
-            .then((rawResponce) => rawResponce.json())
-            .then((responce) => {
-                console.log("задача обновлена", responce);
-                refreshTodos();
-            })
-            .finally(() => {
-                setEditableTodoId(null);
-                setEditableText("");
-            });
+        const todoDbRef = ref(db, `todos/${id}`);
+        set(todoDbRef, {
+            text: editableText,
+        }).then(() => {
+            setEditableTodoId(null);
+            setEditableText("");
+        });
     };
 
     const requestDeleteTodos = (id) => {
-        fetch(`http://localhost:3005/todos/${id}`, {
-            method: "DELETE",
-        })
-            .then((rawResponce) => rawResponce.json())
-            .then((responce) => {
-                console.log("задача удалена", responce);
-                refreshTodos();
-            });
+        const todoDbRef = ref(db, `todos/${id}`);
+
+        remove(todoDbRef).then((responce) => {
+            console.log("задача удалена", responce);
+        });
     };
 
     const toggleSort = (e) => {

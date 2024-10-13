@@ -1,87 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "./App.module.css";
+import {
+    useRequestAddTodos,
+    useRequestDeleteTodos,
+    useRequestEditableTodos,
+    useRequestGetTodos,
+} from "./hooks";
 
 export const App = () => {
-    const [todo, setTodo] = useState("");
-    const [newTodo, setNewTodo] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isCreating, setIsCreating] = useState(false);
     const [refreshTodosFlag, SetRefreshTodosFlag] = useState(false);
-    const [editableTodoId, setEditableTodoId] = useState(null);
-    const [editableText, setEditableText] = useState("");
-    const [isSorted, setIsSorted] = useState(false);
     const [search, setSearch] = useState("");
 
     const refreshTodos = () => SetRefreshTodosFlag(!refreshTodosFlag);
 
-    useEffect(() => {
-        setIsLoading(true);
+    const { isLoading, newTodo, isSorted, setIsSorted } =
+        useRequestGetTodos(refreshTodosFlag);
 
-        fetch("http://localhost:3005/todos")
-            .then((loadedData) => loadedData.json())
-            .then((loadedTodos) => {
-                if (isSorted) {
-                    loadedTodos.sort((a, b) => a.text.localeCompare(b.text));
-                }
-                setNewTodo(loadedTodos);
-            })
-            .finally(() => setIsLoading(false));
-    }, [refreshTodosFlag, isSorted]);
-
-    const requestAddTodos = (event) => {
-        event.preventDefault();
-        setIsCreating(true);
-
-        fetch("http://localhost:3005/todos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json;charset=utf-8" },
-            body: JSON.stringify({
-                text: todo,
-            }),
-        })
-            .then((rawResponce) => rawResponce.json())
-            .then((responce) => {
-                console.log("задача добавлена", responce);
-                refreshTodos();
-            })
-            .finally(() => setIsCreating(false));
-        setTodo("");
-    };
-
-    const handleEdit = (id, text) => {
-        setEditableText(text);
-        setEditableTodoId(id);
-    };
-
-    const requestEditableTodos = (id) => {
-        fetch(`http://localhost:3005/todos/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json;charset=utf-8" },
-            body: JSON.stringify({
-                text: editableText,
-            }),
-        })
-            .then((rawResponce) => rawResponce.json())
-            .then((responce) => {
-                console.log("задача обновлена", responce);
-                refreshTodos();
-            })
-            .finally(() => {
-                setEditableTodoId(null);
-                setEditableText("");
-            });
-    };
-
-    const requestDeleteTodos = (id) => {
-        fetch(`http://localhost:3005/todos/${id}`, {
-            method: "DELETE",
-        })
-            .then((rawResponce) => rawResponce.json())
-            .then((responce) => {
-                console.log("задача удалена", responce);
-                refreshTodos();
-            });
-    };
+    const { isCreating, requestAddTodos, setTodo, todo } =
+        useRequestAddTodos(refreshTodos);
+    const {
+        requestEditableTodos,
+        handleEdit,
+        editableTodoId,
+        editableText,
+        setEditableText,
+    } = useRequestEditableTodos(refreshTodos);
+    const { requestDeleteTodos } = useRequestDeleteTodos(refreshTodos);
 
     const toggleSort = (e) => {
         e.preventDefault();
@@ -92,8 +36,9 @@ export const App = () => {
         setSearch(e.target.value);
     };
 
-    const filteredTodos = newTodo.filter((todo) =>
-        todo.text.toLowerCase().includes(search.toLowerCase()),
+    const filteredTodos = (newTodo || []).filter(
+        (todo) =>
+            todo.text && todo.text.toLowerCase().includes(search.toLowerCase()),
     );
 
     return (
@@ -117,18 +62,23 @@ export const App = () => {
                     onClick={requestAddTodos}
                     type="submit"
                     className={styles.buttonAdd}
-                    disabled={isCreating}
+                    disabled={todo === "" || isCreating}
                 >
                     Добавить
                 </button>
             </form>
-            <input
-                type="text"
-                placeholder="Поиск задач"
-                className={styles.searchInput}
-                value={search}
-                onChange={handleSearchChange}
-            />
+            {filteredTodos.length === 0 ? (
+                <div className={styles.searchInput}>Задачи отсутствуют</div>
+            ) : (
+                <input
+                    type="text"
+                    placeholder={"Поиск задач"}
+                    className={styles.searchInput}
+                    value={search}
+                    onChange={handleSearchChange}
+                />
+            )}
+
             {isLoading ? (
                 <div className={styles.loader}></div>
             ) : (

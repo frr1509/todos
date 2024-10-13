@@ -31,7 +31,6 @@ export const App = () => {
     const handleSearchChange = (e) => {
         setSearch(e.target.value);
     };
-    console.log(newTodo);
     const filteredTodos = (newTodo || []).filter(
         (todo) =>
             todo.text && todo.text.toLowerCase().includes(search.toLowerCase()),

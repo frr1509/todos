@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { ref, set} from "firebase/database";
+import { db } from "../firebase";
 
-export const useRequestEditableTodos = (refreshTodos) => {
+export const useRequestEditableTodos = () => {
     const [editableTodoId, setEditableTodoId] = useState(null);
     const [editableText, setEditableText] = useState("");
 
@@ -10,22 +12,13 @@ export const useRequestEditableTodos = (refreshTodos) => {
     };
 
     const requestEditableTodos = (id) => {
-        fetch(`http://localhost:3005/todos/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json;charset=utf-8" },
-            body: JSON.stringify({
-                text: editableText,
-            }),
-        })
-            .then((rawResponce) => rawResponce.json())
-            .then((responce) => {
-                console.log("задача обновлена", responce);
-                refreshTodos();
-            })
-            .finally(() => {
-                setEditableTodoId(null);
-                setEditableText("");
-            });
+        const todoDbRef = ref(db, `todos/${id}`);
+        set(todoDbRef, {
+            text: editableText,
+        }).then(() => {
+            setEditableTodoId(null);
+            setEditableText("");
+        });
     };
 
     return {

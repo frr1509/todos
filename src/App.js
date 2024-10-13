@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "./App.module.css";
+
 import {
     useRequestAddTodos,
     useRequestDeleteTodos,
@@ -8,24 +9,19 @@ import {
 } from "./hooks";
 
 export const App = () => {
-    const [refreshTodosFlag, SetRefreshTodosFlag] = useState(false);
     const [search, setSearch] = useState("");
 
-    const refreshTodos = () => SetRefreshTodosFlag(!refreshTodosFlag);
+    const { isLoading, newTodo, isSorted, setIsSorted } = useRequestGetTodos();
 
-    const { isLoading, newTodo, isSorted, setIsSorted } =
-        useRequestGetTodos(refreshTodosFlag);
-
-    const { isCreating, requestAddTodos, setTodo, todo } =
-        useRequestAddTodos(refreshTodos);
+    const { isCreating, requestAddTodos, setTodo, todo } = useRequestAddTodos();
     const {
         requestEditableTodos,
         handleEdit,
         editableTodoId,
         editableText,
         setEditableText,
-    } = useRequestEditableTodos(refreshTodos);
-    const { requestDeleteTodos } = useRequestDeleteTodos(refreshTodos);
+    } = useRequestEditableTodos();
+    const { requestDeleteTodos } = useRequestDeleteTodos();
 
     const toggleSort = (e) => {
         e.preventDefault();
@@ -35,12 +31,11 @@ export const App = () => {
     const handleSearchChange = (e) => {
         setSearch(e.target.value);
     };
-
+    console.log(newTodo);
     const filteredTodos = (newTodo || []).filter(
         (todo) =>
             todo.text && todo.text.toLowerCase().includes(search.toLowerCase()),
     );
-
     return (
         <div className={styles.app}>
             <div className={styles.title}>Список дел</div>
@@ -67,18 +62,13 @@ export const App = () => {
                     Добавить
                 </button>
             </form>
-            {filteredTodos.length === 0 ? (
-                <div className={styles.searchInput}>Задачи отсутствуют</div>
-            ) : (
-                <input
-                    type="text"
-                    placeholder={"Поиск задач"}
-                    className={styles.searchInput}
-                    value={search}
-                    onChange={handleSearchChange}
-                />
-            )}
-
+            <input
+                type="text"
+                placeholder={"Поиск задач"}
+                className={styles.searchInput}
+                value={search}
+                onChange={handleSearchChange}
+            />
             {isLoading ? (
                 <div className={styles.loader}></div>
             ) : (

@@ -1,28 +1,34 @@
 import { useEffect, useState } from "react";
-
-export const useRequestGetTodos = (refreshTodosFlag) => {
+import { ref, onValue } from "firebase/database";
+import { db } from "../firebase";
+export const useRequestGetTodos = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [newTodo, setNewTodo] = useState([]);
     const [isSorted, setIsSorted] = useState(false);
 
     useEffect(() => {
         setIsLoading(true);
-
-        fetch("http://localhost:3005/todos")
-            .then((loadedData) => loadedData.json())
-            .then((loadedTodos) => {
-                if (isSorted) {
-                    loadedTodos.sort((a, b) => a.text.localeCompare(b.text));
-                }
-                setNewTodo(loadedTodos);
-            })
-            .finally(() => setIsLoading(false));
-    }, [refreshTodosFlag, isSorted]);
-
+        const todosDbRef = ref(db, "todos");
+        return onValue(todosDbRef, (snapshot) => {
+            const loadedTodos = snapshot.val();
+            const todosArray = loadedTodos
+                ? Object.entries(loadedTodos).map(([id, todo]) => ({
+                      id,
+                      ...todo,
+                  }))
+                : [];
+            if (isSorted) {
+                todosArray.sort((a, b) => a.text.localeCompare(b.text));
+            }
+            setNewTodo(todosArray);
+            setIsLoading(false);
+        });
+    }, [isSorted]);
+    // console.log(newTodo)
     return {
         isLoading,
         newTodo,
         isSorted,
-        setIsSorted
+        setIsSorted,
     };
 };

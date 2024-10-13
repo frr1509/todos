@@ -1,8 +1,7 @@
 {
-  "todos": [
-    {
-      "text": "asd",
-      "id": 1
+  "todos": {
+    "1": {
+      "text": "asd"
     }
-  ]
+    }
 }

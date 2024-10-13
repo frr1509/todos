@@ -1,71 +1,28 @@
-import { useState, useEffect } from "react";
-import { ref, onValue, push, set, remove } from "firebase/database";
+import { useState } from "react";
 import styles from "./App.module.css";
 import { db } from "./firebase";
 
+import {
+    useRequestAddTodos,
+    useRequestDeleteTodos,
+    useRequestEditableTodos,
+    useRequestGetTodos,
+} from "./hooks";
+
 export const App = () => {
-    const [todo, setTodo] = useState("");
-    const [newTodo, setNewTodo] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isCreating, setIsCreating] = useState(false);
-    const [editableTodoId, setEditableTodoId] = useState(null);
-    const [editableText, setEditableText] = useState("");
-    const [isSorted, setIsSorted] = useState(false);
     const [search, setSearch] = useState("");
 
-    useEffect(() => {
-        setIsLoading(true);
-        const todosDbRef = ref(db, "todos");
-        return onValue(todosDbRef, (snapshot) => {
-            const loadedTodos = snapshot.val();
-            const todosArray = loadedTodos
-                ? Object.entries(loadedTodos).map(([id, todo]) => ({
-                      id,
-                      ...todo,
-                  }))
-                : [];
-            if (isSorted) {
-                todosArray.sort((a, b) => a.text.localeCompare(b.text));
-            }
-            setNewTodo(todosArray);
-            setIsLoading(false);
-        });
-    }, [isSorted]);
+    const { isLoading, newTodo, isSorted, setIsSorted } = useRequestGetTodos();
 
-    const requestAddTodos = (event) => {
-        const todosDbRef = ref(db, "todos");
-        event.preventDefault();
-        setIsCreating(true);
-        push(todosDbRef, {
-            text: todo,
-        }).then(() => {
-            setTodo("");
-            setIsCreating(false);
-        });
-    };
-
-    const handleEdit = (id, text) => {
-        setEditableText(text);
-        setEditableTodoId(id);
-    };
-
-    const requestEditableTodos = (id) => {
-        const todoDbRef = ref(db, `todos/${id}`);
-        set(todoDbRef, {
-            text: editableText,
-        }).then(() => {
-            setEditableTodoId(null);
-            setEditableText("");
-        });
-    };
-
-    const requestDeleteTodos = (id) => {
-        const todoDbRef = ref(db, `todos/${id}`);
-
-        remove(todoDbRef).then((responce) => {
-            console.log("задача удалена", responce);
-        });
-    };
+    const { isCreating, requestAddTodos, setTodo, todo } = useRequestAddTodos();
+    const {
+        requestEditableTodos,
+        handleEdit,
+        editableTodoId,
+        editableText,
+        setEditableText,
+    } = useRequestEditableTodos();
+    const { requestDeleteTodos } = useRequestDeleteTodos();
 
     const toggleSort = (e) => {
         e.preventDefault();
@@ -75,11 +32,10 @@ export const App = () => {
     const handleSearchChange = (e) => {
         setSearch(e.target.value);
     };
-
-    const filteredTodos = newTodo.filter((todo) =>
-        todo.text.toLowerCase().includes(search.toLowerCase()),
+    const filteredTodos = (newTodo || []).filter(
+        (todo) =>
+            todo.text && todo.text.toLowerCase().includes(search.toLowerCase()),
     );
-
     return (
         <div className={styles.app}>
             <div className={styles.title}>Список дел</div>
@@ -101,14 +57,14 @@ export const App = () => {
                     onClick={requestAddTodos}
                     type="submit"
                     className={styles.buttonAdd}
-                    disabled={isCreating}
+                    disabled={todo === "" || isCreating}
                 >
                     Добавить
                 </button>
             </form>
             <input
                 type="text"
-                placeholder="Поиск задач"
+                placeholder={"Поиск задач"}
                 className={styles.searchInput}
                 value={search}
                 onChange={handleSearchChange}

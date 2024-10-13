@@ -2,16 +2,15 @@ import { getDatabase } from "firebase/database";
 import { initializeApp } from "firebase/app";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCer6GqVSSk94NmWYXYNSutp3jRQsLSM68",
-    authDomain: "todosproject-5fa31.firebaseapp.com",
-    projectId: "todosproject-5fa31",
-    storageBucket: "todosproject-5fa31.appspot.com",
-    messagingSenderId: "928788041522",
-    appId: "1:928788041522:web:a83758a61849ce9ef6d12b",
+    apiKey: "AIzaSyBkkh2F62XjJFA1xvP_0CMvTok9OrjQ1h4",
+    authDomain: "todosproject-42c2f.firebaseapp.com",
     databaseURL:
-        "https://todosproject-5fa31-default-rtdb.europe-west1.firebasedatabase.app/",
+        "https://todosproject-42c2f-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "todosproject-42c2f",
+    storageBucket: "todosproject-42c2f.appspot.com",
+    messagingSenderId: "411528833784",
+    appId: "1:411528833784:web:26752370e42e91f51a290d",
 };
-
 const app = initializeApp(firebaseConfig);
 
 export const db = getDatabase(app);

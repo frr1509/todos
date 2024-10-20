@@ -67,31 +67,26 @@ export const App = () => {
                     Добавить
                 </button>
             </form>
-            {filteredTodos.length === 0 ? (
-                <div className={styles.searchInput}>Задачи отсутствуют</div>
-            ) : (
-                <input
-                    type="text"
-                    placeholder={"Поиск задач"}
-                    className={styles.searchInput}
-                    value={search}
-                    onChange={handleSearchChange}
-                />
-            )}
-
+            <input
+                type="text"
+                placeholder={"Поиск задач"}
+                className={styles.searchInput}
+                value={search}
+                onChange={handleSearchChange}
+            />
             {isLoading ? (
                 <div className={styles.loader}></div>
             ) : (
                 filteredTodos.map(({ id, text }) => (
                     <div key={id} className={styles.todoItemContainer}>
                         {editableTodoId === id ? (
-                            <input
-                                className={styles.inputField}
+                            <textarea
+                                className={styles.textField}
                                 value={editableText}
                                 onChange={(e) =>
                                     setEditableText(e.target.value)
                                 }
-                            ></input>
+                            ></textarea>
                         ) : (
                             <div className={styles.todoItem}>{text}</div>
                         )}
